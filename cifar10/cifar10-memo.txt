@@ -1,0 +1,4 @@
+git clone https://github.com/YoongiKim/CIFAR-10-images.git
+mv CIFAR-10-images/ cifar-10-images
+tar czvf cifar-10-images.tgz cifar-10-images/
+scp cifar-10-images.tgz nfsuser@20.48.5.137:/export/viya4/data
