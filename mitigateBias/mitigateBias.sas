@@ -22,20 +22,20 @@ fairAITools.mitigateBias /
          decisionTree.gbtreeTrain result=train_res /
             table=table,
             weight=weight,
-            target=""BAD"",
+            target='BAD',
             inputs= {
-               ""loan"", ""mortdue"", ""value"",
-               ""yoj"", ""derog"", ""delinq"",
-               ""clage"", ""ninq"", ""clno"",
-               ""debtinc"", ""job""
+               'loan', 'mortdue', 'value',
+               'yoj', 'derog', 'delinq',
+               'clage', 'ninq', 'clno',
+               'debtinc', 'job'
             },
-            nominals={""BAD"",""job""},
+            nominals={'BAD','job'},
             nBins=50,
             quantileBin=True,
             maxLevel=5,
             maxBranch=2,
             leafSize=5,
-            missing=""USEINSEARCH"",
+            missing='USEINSEARCH',
             minUseInSearch=1,
             binOrder=True,
             varImp=True,
@@ -45,7 +45,7 @@ fairAITools.mitigateBias /
             seed=12345,
             ridge=1,
             savestate={
-               name=""hmeq_gb_astore"",
+               name='hmeq_gb_astore',
                replace=True
             }
          ;
@@ -53,7 +53,7 @@ fairAITools.mitigateBias /
             table=table,
             casout=casout,
             copyVars=copyVars,
-            rstore=""hmeq_gb_astore""
+            rstore='hmeq_gb_astore'
          ;
       ",
     tuneBound="True";
