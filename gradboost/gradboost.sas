@@ -1,7 +1,7 @@
-option locale=en_us;
-option cashost="sas-cas-server-default-client" casport=5570;
+/* option locale=en_us; */
+/* option cashost="sas-cas-server-default-client" casport=5570; */
 
-ods html5 style=Illuminate;
+/* ods html5 style=Illuminate; */
 
 /***
 proc setinit;
