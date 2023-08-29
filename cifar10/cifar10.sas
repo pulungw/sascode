@@ -93,6 +93,6 @@ proc cas;
 			maxEpochs=5
 			logLevel=2
 		}
-		gpu={device=0}
+/* 		gpu={device=0} */
 	;
 quit;
