@@ -1,0 +1,226 @@
+1    /* region: Generated preamble */
+2    /* Make sure the current directory is writable */
+3    data _null_;
+4        length rc 4;
+5        %let tworkloc="%sysfunc(getoption(work))";
+6        rc=dlgcdir(&tworkloc);
+7    run;
+NOTE: The current working directory is now 
+      "/opt/sas/viya/config/var/tmp/compsrv/default/f5064ba0-a7ab-4b52-9fad-c3d12f537209/SAS_work6E3A000000AF_sas-compute-server-c47
+      ce900-e93a-4bba-bd40-1b1436ee264b-9cf62".
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+8    
+9    /* Setup options */
+10   title;
+11   footnote;
+12   options validvarname=any;
+13   options validmemname=extend;
+14   options dtreset date number;
+15   options device=png;
+16   
+17   /* Setup macro variables */
+18   %let syscc=0;
+19   %let _clientapp = %nrquote(%nrstr(SAS Studio));
+20   %let _clientappabbrev = %nrquote(%nrstr(Studio));
+21   %let _clientappversion=2023.07;
+22   %let _clientversion=;
+23   %let _sasservername=&SYSHOSTNAME;
+24   %let _sashostname=&SYSHOSTNAME;
+25   %let _sasprogramfilehost=&SYSHOSTNAME;
+26   %let _clientuserid = %nrquote(%nrstr(sasdemo));
+27   %let _clientusername = %nrquote(%nrstr(SAS Demo User));
+28   %let clientmachine = %nrquote(%nrstr());
+29   %let _clientmachine = %nrquote(%nrstr());
+30   %let _clientmode = %nrquote(%nrstr(viya));
+31   %let sasworklocation="%sysfunc(getoption(work))/";
+32   filename _cwd &sasworklocation;
+33   data _null_;
+34       call symput('_sasworkingdir',pathname('_cwd'));
+35   run;
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+36   filename _cwd;
+NOTE: Fileref _CWD has been deassigned.
+37   %let _sasprogramfile = %nrquote(%nrstr(/mnt/viya-share/data/sascode/python/fugashi_sample.py));
+38   %let _baseurl = %nrquote(%nrstr(https://scr-test.japaneast.cloudapp.azure.com/SASStudio/));
+39   %let _execenv = %nrquote(%nrstr(SASStudio));
+40   %symdel _dataout_mime_type _dataout_name _dataout_url _dataout_table / nowarn;
+41   %let _sasws_ = %bquote(%sysfunc(getoption(work)));
+42   %let _saswstemp_ = %bquote(%sysfunc(getoption(work)));
+43   
+44   /* Detect SAS/Graph and setup graph options */
+45   data _null_;
+46       length rc $255;
+47       call symput("graphinit","");
+48       call symput("graphterm","");
+49       rc=tslvl('sasxgopt','n');
+50       _error_=0;
+51       if (rc^=' ') then do;
+52           call symput("graphinit","goptions reset=all gsfname=_gsfname;");
+53           call symput("graphterm","goptions noaccessible;");
+54       end;
+55   run;
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.00 seconds
+      
+56   data _null_;
+57       length rc 4;
+58       rc=sysprod("PRODNUM002");
+59       if (rc^=1) then do;
+60           call symput("graphinit","");
+61           call symput("graphterm","");
+62       end;
+63   run;
+NOTE: DATA statement used (Total process time):
+      real time           0.00 seconds
+      cpu time            0.01 seconds
+      
+64   
+65   /* Setup ODS destinations */
+66   ods _all_ close;
+67   %studio_results_directory;
+68   filename _htmlout "&_results_prefix_..html";
+69   filename _listout "&_results_prefix_..lst";
+70   filename _gsfname temp;
+71   filename _dataout "&_results_prefix_..dat";
+72   ods autonavigate off;
+73   ods graphics on;
+74   ods html5 (id=web) METATEXT='http-equiv="Content-Security-Policy" content="default-src ''none''; style-src ''unsafe-inline'';
+74 ! img-src data: ;"' device=png gpath="&_saswstemp_" path="&_saswstemp_" encoding=utf8 file=_htmlout
+74 ! (title='Results:fugashi_sample.py') style=Illuminate options(bitmap_mode='inline' outline='on' svg_mode='inline'
+74 ! css_prefix=".ods_&SYS_COMPUTE_JOB_ID" body_id="div_&SYS_COMPUTE_JOB_ID" );
+NOTE: Writing HTML5(WEB) Body file: _HTMLOUT
+75   ods listing file=_listout;
+76   &graphinit;
+77   %studio_initialize_custom_output;
+78   /* endregion */
+79   
+80   proc python;
+81   submit
+NOTE: Python initialized.
+Python 3.9.16 (main, Sep 25 2023, 08:02:55) 
+[GCC 8.5.0 20210514 (Red Hat 8.5.0-18)] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
+>>> 
+81 !       ;
+82   
+83   import torch
+84   from transformers import AutoTokenizer, AutoModelForMaskedLM
+85   from fugashi import Tagger
+86   
+87   # parse text using fugashi (mecab + unidic-lite)
+88   def preprocessing_text(text):
+89       tagger = Tagger('-Owakati')
+90       parsed_text = tagger.parse(text)
+91       parsed_text = parsed_text.replace("[ MASK ]", "[MASK]")
+92       return parsed_text
+93   
+94   text = "京都大学で自然言語処理を[MASK]する。"
+95   parsed_text = preprocessing_text(text)
+96   
+97   print(text)
+98   print(parsed_text)
+99   
+100  # import japanese language model from huggingface
+101  tokenizer = AutoTokenizer.from_pretrained('ku-nlp/deberta-v2-base-japanese', cache_dir='./tmp')
+102  model = AutoModelForMaskedLM.from_pretrained('ku-nlp/deberta-v2-base-japanese', cache_dir='./tmp')
+103  
+104  # encode input parsed text
+105  encoded_input = tokenizer(parsed_text, return_tensors='pt')
+106  input_ids = encoded_input.input_ids
+107  print(encoded_input)
+108  
+109  # get location of mask token
+110  masked_index = torch.where(input_ids == tokenizer.mask_token_id)[1].tolist()[0]
+111  print(masked_index)
+112  
+113  # predict mask
+114  result = model(encoded_input.input_ids)
+115  print(result)
+116  
+117  # get top 5 result
+118  pred_list = []
+119  pred_ids = result[0][:, masked_index].topk(5).indices.tolist()[0]
+120  for pred_id in pred_ids:
+121      output_ids = input_ids.tolist()[0]
+122      output_ids[masked_index] = pred_id
+123      pred_list.append(tokenizer.decode(output_ids))
+124  
+125  print(pred_list)
+126  
+127  endsubmit;
+128  quit;
+>>>
+There was a problem when trying to write in your cache folder (/.cache/huggingface/hub). You should set the environment variable 
+TRANSFORMERS_CACHE to a writable directory.
+京都大学で自然言語処理を[MASK]する。
+京都 大学 で 自然 言語 処理 を [MASK] する 。
+Downloading (…)okenizer_config.json:   0%|          | 0.00/353 [00:00<?, ?B/s]Downloading (…)okenizer_config.json: 
+100%|██████████| 353/353 [00:00<00:00, 86.7kB/s]
+Downloading spm.model:   0%|          | 0.00/805k [00:00<?, ?B/s]Downloading spm.model: 100%|██████████| 
+805k/805k [00:00<00:00, 51.9MB/s]
+Downloading (…)/main/tokenizer.json:   0%|          | 0.00/2.41M [00:00<?, ?B/s]Downloading (…)/main/tokenizer.json: 
+100%|██████████| 2.41M/2.41M [00:00<00:00, 47.6MB/s]
+Downloading (…)cial_tokens_map.json:   0%|          | 0.00/173 [00:00<?, ?B/s]Downloading (…)cial_tokens_map.json: 
+100%|██████████| 173/173 [00:00<00:00, 100kB/s]
+Downloading (…)lve/main/config.json:   0%|          | 0.00/893 [00:00<?, ?B/s]Downloading (…)lve/main/config.json: 
+100%|██████████| 893/893 [00:00<00:00, 269kB/s]
+2023-10-04 05:07:43.371638: I tensorflow/core/platform/cpu_feature_guard.cc:182] This TensorFlow binary is optimized to use 
+available CPU instructions in performance-critical operations.
+To enable the following instructions: AVX2 AVX512F FMA, in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2023-10-04 05:07:48.630826: W tensorflow/compiler/tf2tensorrt/utils/py_utils.cc:38] TF-TRT Warning: Could not find TensorRT
+Downloading model.safetensors:   0%|          | 0.00/548M [00:00<?, ?B/s]Downloading model.safetensors:   6%|▌         | 
+31.5M/548M [00:00<00:01, 308MB/s]Downloading model.safetensors:  13%|█▎        | 73.4M/548M [00:00<00:01, 303MB/s]Downloading 
+model.safetensors:  19%|█▉        | 105M/548M [00:00<00:01, 300MB/s] Downloading model.safetensors:  27%|██▋       | 
+147M/548M [00:00<00:01, 312MB/s]Downloading model.safetensors:  34%|███▍      | 189M/548M [00:00<00:01, 
+322MB/s]Downloading model.safetensors:  42%|████▏     | 231M/548M [00:00<00:01, 251MB/s]Downloading model.safetensors:  
+48%|████▊     | 262M/548M [00:01<00:01, 221MB/s]Downloading model.safetensors:  54%|█████▎    | 294M/548M 
+[00:01<00:01, 231MB/s]Downloading model.safetensors:  59%|█████▉    | 325M/548M [00:01<00:01, 147MB/s]Downloading 
+model.safetensors:  67%|██████▋   | 367M/548M [00:01<00:00, 187MB/s]Downloading model.safetensors:  
+73%|███████▎  | 398M/548M [00:01<00:00, 164MB/s]Downloading model.safetensors:  78%|███████▊  | 
+430M/548M [00:02<00:00, 165MB/s]Downloading model.safetensors:  82%|████████▏ | 451M/548M [00:02<00:00, 
+135MB/s]Downloading model.safetensors:  88%|████████▊ | 482M/548M [00:02<00:00, 148MB/s]Downloading 
+model.safetensors:  92%|█████████▏| 503M/548M [00:02<00:00, 148MB/s]Downloading model.safetensors:  
+96%|█████████▌| 524M/548M [00:02<00:00, 135MB/s]Downloading model.safetensors:  
+99%|█████████▉| 545M/548M [00:02<00:00, 147MB/s]Downloading model.safetensors: 
+100%|██████████| 548M/548M [00:02<00:00, 183MB/s]
+{'input_ids': tensor([[   1,  976,  413,  269, 1398, 1919, 1597,  265,    4,  279,  263,    2]]), 'token_type_ids': tensor([[0, 0, 
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]), 'attention_mask': tensor([[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]])}
+8
+MaskedLMOutput(loss=None, logits=tensor([[[ -3.6625,   1.8275,  -1.3899,  ...,  -4.1424,  -3.5934,  -4.3699],
+         [ -4.6224,   1.0491,  -2.1352,  ...,  -6.3060,  -7.2638,  -4.2514],
+         [ -6.7977,   0.7383,  -1.6446,  ...,  -7.6282, -11.9880,  -6.9375],
+         ...,
+         [ -7.5726,   0.1550,  -3.6146,  ...,  -4.7475,  -1.4248,  -7.6004],
+         [ -8.0078,   2.0831,  -2.0079,  ...,  -5.7684,  -2.4622,  -6.9842],
+         [ -3.7765,  -0.6220,  -1.8791,  ...,  -4.9485,  -8.2886,  -6.4009]]],
+       grad_fn=<ViewBackward0>), hidden_states=None, attentions=None)
+['[CLS] 京都 大学 で 自然 言語 処理 を 専攻 する 。[SEP]', '[CLS] 京都 大学 で 自然 言語 処理 を 
+研究 する 。[SEP]', '[CLS] 京都 大学 で 自然 言語 処理 を 勉強 する 。[SEP]', '[CLS] 京都 大学 で 
+自然 言語 処理 を 履修 する 。[SEP]', '[CLS] 京都 大学 で 自然 言語 処理 を 担当 する 。[SEP]']
+>>
+NOTE: PROCEDURE PYTHON used (Total process time):
+      real time           37.86 seconds
+      cpu time            0.14 seconds
+      
+129  
+130  /* region: Generated postamble */
+131  /* Close ODS destinations */
+132  &graphterm; ;*';*";*/;run;quit;
+133  quit;run;
+134  ods html5 (id=web) close;
+135  ods listing close;
+136  %if %sysfunc(fileref(_gsfname)) lt 0 %then %do;
+137      filename _gsfname clear;
+NOTE: Fileref _GSFNAME has been deassigned.
+138  %end;
+139  %studio_capture_custom_output;
+140  /* endregion */
+141  
