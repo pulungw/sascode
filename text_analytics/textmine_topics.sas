@@ -43,13 +43,13 @@ proc textmine data=casuser.reviews language=english;
 		outchild=casuser.child
 		outparent=casuser.parent
 		outconfig=casuser.config
-		reducef=1
+		reducef=2
 		stop=casuser.en_stoplist
 		entities=std
 	;
 	svd
 		k=3
-		numlabels=3
+		numlabels=5
 		outdocpro=casuser.docpro
 		outtopics=casuser.topics
 		svds=casuser.svds
