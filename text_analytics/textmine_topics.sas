@@ -2,6 +2,7 @@ cas;
 caslib _all_ assign;
 %let ASTORE_PATH=/tmp/tmmodel.astore;
 
+/* Create dataset */
 data casuser.reviews;
    infile datalines delimiter='|' missover;
    length text $300 category $20;
@@ -19,6 +20,7 @@ data casuser.reviews;
 ;
 run;
 
+/* Load stoplist */
 proc cas;                                            
    loadtable 
 		caslib="ReferenceData" 
@@ -34,6 +36,7 @@ proc cas;
 	tableinfo caslib="casuser" name="ja_stoplist";
 run;
 
+/* Text Parsing + Entities extraction + SVD Topics extraction */
 proc textmine data=casuser.reviews language=english;
 	doc_id did;
 	variables text;
@@ -58,15 +61,19 @@ proc textmine data=casuser.reviews language=english;
 	savestate rstore=casuser.tmmodel;
 run;
 
+/* Get SVDU vector */
 proc print data=casuser.svdu;
 run;
 
+/* Get terms */
 proc print data=casuser.terms;
 run;
 
+/* Get topics */
 proc print data=casuser.topics;
 run;
 
+/* Score topics for new data */
 proc tmscore
 	data=casuser.reviews
 	terms=casuser.terms
@@ -78,6 +85,7 @@ doc_id did;
 variables text;
 run;
 
+/* Save and score from astore */
 proc astore;
 	download 
 		rstore=casuser.tmmodel 
