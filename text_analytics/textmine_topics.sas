@@ -16,7 +16,6 @@ data casuser.reviews;
     The book has a terrific plot!|1|books |7
     The book's plot was suspenseful. Good read.|1|books|8
     I love the author, but this book is a waste of time to read.|0|books|9
-	The current president of United States is George W. Bush.|0|books|10
 ;
 run;
 
