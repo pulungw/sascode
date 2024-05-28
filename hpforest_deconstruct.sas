@@ -10,7 +10,7 @@ run;
 
 /*** Training code ***/
 proc hpforest data=work.train maxtrees=50 maxdepth=50 seed=10 importance=yes;
-	target &TARGET. / level=nominal;
+	target &TARGET. / level=binary;
 	input &VARS_INTERVAL. / level=interval;
 	input &VARS_NOMINAL. / level=nominal;
 	savestate file="C:\temp\model.sasast";
