@@ -1,7 +1,7 @@
 proc setinit;run;
 
 /* specify DSN from odbc.ini in libname statement */
-libname azsql sqlsvr datasrc="z01-dev" schema=SalesLT user=azureuser password=Orion123Orion123;
+libname azsql sqlsvr datasrc="z01-dev" schema=SalesLT user=azureuser password=************;
  
 /* test read */
 proc sql inobs=100;
