@@ -1,6 +1,3 @@
-proc setinit;
-run;
-
 cas;
 caslib _all_ assign;
 
