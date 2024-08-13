@@ -1,7 +1,7 @@
 cas;
 caslib _all_ assign;
 
-options locale=ja_JP;
+options locale=en_US;
 
 data _null_;
     pi = constant('pi');
@@ -90,7 +90,6 @@ proc regselect data=casuser.train;
     store out=casuser.model_reg;
 run;
 
-
 /***
 Gradient Boosting
 ****/
@@ -101,15 +100,19 @@ proc gradboost data=casuser.train;
 	ods output FitStatistics=work.GB_FITSTAT VariableImportance=work.GB_VARIMP;
 run;
 
+proc sgplot data=GB_FITSTAT;
+	series x=trees y=ASETrain;
+run;
 
 /***
 Neural Network
 ***/
-
 proc nnet data=casuser.train;
 	architecture mlp;
 	target y / level=interval;
 	input x / level=interval;
+	hidden 64;
+	hidden 64;
 	hidden 64;
 
 	optimization algorithm=lbfgs maxiter=100;
@@ -118,6 +121,9 @@ proc nnet data=casuser.train;
 	ods output OptIterHistory=iterhist;
 run;
 
+proc sgplot data=iterhist;
+	series x=progress y=loss;
+run;
 
 /***
 Random Forest
@@ -129,6 +135,9 @@ proc forest data=casuser.train;
 	ods output FitStatistics=work.RF_FITSTAT VariableImportance=work.RF_VARIMP;
 run;
 
+proc sgplot data=RF_FITSTAT;
+	series x=trees y=ASETrain;
+run;
 /***
 Decision Tree
 ****/
