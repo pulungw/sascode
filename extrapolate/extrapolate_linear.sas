@@ -28,14 +28,14 @@ data casuser.train;
     y = &PI_VALUE. * x + 200*e;
 run;
 
+title "Training Data";
 proc sgplot data=casuser.train noautolegend;
-	title "Training Data ";
     scatter x=x y=y / markerattrs=(symbol=circlefilled size=10 color=blue) transparency=0.7;
     lineparm x=0 y=0 slope=&PI_VALUE. / lineattrs=(thickness=3 color=red pattern=solid);
 	refline 1000 / axis=x lineattrs=(pattern=dash);
     xaxis max=1500;
 run;
-
+title;
 
 /***
 Test Data
@@ -55,10 +55,12 @@ data casuser.test;
     y = &PI_VALUE. * x + 200*e;
 run;
 
+title "Test Data";
 proc sgplot data=casuser.test noautolegend;
     scatter x=x y=y / markerattrs=(symbol=circlefilled size=10) transparency=0.7;
     lineparm x=0 y=0 slope=&PI_VALUE. / lineattrs=(thickness=3 color=red pattern=shortdash);
 run;
+title;
 
 
 /***
@@ -111,8 +113,6 @@ proc nnet data=casuser.train;
 	architecture mlp;
 	target y / level=interval;
 	input x / level=interval;
-	hidden 64;
-	hidden 64;
 	hidden 64;
 
 	optimization algorithm=lbfgs maxiter=100;

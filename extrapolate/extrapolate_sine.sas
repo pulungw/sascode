@@ -28,14 +28,14 @@ data casuser.train;
     y = 200*sin(0.035*x) + 50*e;
 run;
 
+title "Training Data";
 proc sgplot data=casuser.train noautolegend;
-	title "Training Data ";
     scatter x=x y=y / markerattrs=(symbol=circlefilled size=10 color=blue) transparency=0.7;
     /* lineparm x=0 y=0 slope=&PI_VALUE. / lineattrs=(thickness=3 color=red pattern=solid); */
 	refline 1000 / axis=x lineattrs=(pattern=dash);
     xaxis max=1500;
 run;
-
+title;
 
 /***
 Test Data
@@ -55,11 +55,13 @@ data casuser.test;
     y = 200*sin(0.035*x) + 50*e;
 run;
 
+title "Test Data";
 proc sgplot data=casuser.test noautolegend;
     scatter x=x y=y / markerattrs=(symbol=circlefilled size=10) transparency=0.7;
     /* lineparm x=0 y=0 slope=&PI_VALUE. / lineattrs=(thickness=3 color=red pattern=shortdash); */
 	refline 1000 / axis=x lineattrs=(pattern=dash);
 run;
+title;
 
 
 /***
