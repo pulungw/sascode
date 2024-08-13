@@ -25,7 +25,7 @@ run;
 
 data casuser.train;
     set casuser.input;
-    y = 200*sin(0.035*x) + 50*e;
+    y = 200*sin(0.025*x) + 40*e;
 run;
 
 title "Training Data";
@@ -52,7 +52,7 @@ run;
 
 data casuser.test;
     set casuser.input;
-    y = 200*sin(0.035*x) + 50*e;
+    y = 200*sin(0.025*x) + 40*e;
 run;
 
 title "Test Data";
