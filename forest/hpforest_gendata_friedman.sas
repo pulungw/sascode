@@ -1,4 +1,4 @@
-data work.input;
+data work.seed;
     call streaminit(12345);
     do i=1 to 5000;
         x1 = rand("uniform");
